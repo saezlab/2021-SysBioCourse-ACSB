@@ -1,0 +1,75 @@
+---
+title: 'Task 2: explore prior knowledge network'
+author: "A. Gabor"
+date: "6/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(OmnipathR)
+library(tibble)
+library(dplyr)
+
+```
+
+
+
+## Download post-translational modifications:
+
+```{r}
+# 
+ptms = import_omnipath_enzsub(resources=c("PhosphoSite", "SIGNOR")) %>% as_tibble()
+head(ptms,10)
+```
+
+Enzyme-substrate information could be useful when measurements are antibody based 
+that recognise the phosphorylaition of certain p-sites of the proteins. 
+
+Enz-substr interactions are often limited (total 14k interactions). 
+
+
+
+## Download protein-protein interactions
+
+
+
+```{r}
+interactions = import_omnipath_interactions() %>% as_tibble()
+head(interactions,10)
+```
+
+What are the interactions of MAPK1? 
+
+```{r}
+interactions %>% dplyr::filter(source_genesymbol == "MAPK1") %>% print_interactions()
+```
+
+## Convert to graph to search for neighbours
+```{r}
+OPI_g = interaction_graph(interactions = interactions)
+```
+
+
+
+Let's say we want to connect two nodes of the network and we need evidence: 
+Use shortest path to find connections. 
+```{r}
+
+sp_Tyro2STAT3 <- shortest_paths(OPI_g,from = "TYRO3",to = "STAT3",
+   output = 'epath')
+
+
+print_path_es(shortest_paths(OPI_g,from = "TYRO3",to = "STAT3",
+   output = 'epath')$epath[[1]],OPI_g)
+
+```
+
+
+
+
+```{r}
+sessionInfo()
+```
+
